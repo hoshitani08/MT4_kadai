@@ -57,6 +57,8 @@ private: // メンバ変数
 	//オブジェクト
 	std::unique_ptr<FbxObject3d> fbxObject3d;
 
+	std::unique_ptr<Object3d> object3d;
+
 	//ライト
 	std::unique_ptr<LightGroup> light;
 	//光線方向初期値
