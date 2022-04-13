@@ -68,4 +68,9 @@ private: // メンバ変数
 	float fighterPos[3] = { 1, 0.0f, 0 };
 	//当たり判定
 	CollisionManager* collisionManager = nullptr;
+
+	//接地フラグ
+	bool onGround = true;
+	// 落下ベクトル
+	DirectX::XMVECTOR fallV;
 };

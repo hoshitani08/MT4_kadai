@@ -63,6 +63,10 @@ void GameScene::Initialize()
 
 	// FBXオブジェクト生成
 	fbxObject3d = FbxObject3d::Create(FbxFactory::GetInstance()->GetModel("a"), L"NormalMapFBX");
+
+	float scale = 0.1f;
+	fbxObject3d->SetScale({ scale, scale, scale });
+	fbxObject3d->SetPosition({ 0, 50, 0 });
 	//アニメーション
 	//fbxObject3d->PlayAnimation();
 
@@ -81,6 +85,27 @@ void GameScene::Update()
 	light->Update();
 	camera->Update();
 	particleMan->Update();
+
+	// 落下処理
+	if (!onGround)
+	{
+		// 下向き加速度
+		const float fallAcc = -0.98f;
+		const float fallVYMin = -100.0f;
+		// 加速
+		fallV.m128_f32[1] = fallV.m128_f32[1] + fallAcc;
+		// 移動
+		XMFLOAT3 position = fbxObject3d->GetPosition();
+		position.x += fallV.m128_f32[0];
+		position.y += fallV.m128_f32[1];
+		position.z += fallV.m128_f32[2];
+
+		fbxObject3d->SetPosition(position);
+	}
+	else if (input->TriggerKey(DIK_SPACE))
+	{
+		onGround = false;
+	}
 
 	fbxObject3d->Update();
 	// 全ての衝突をチェック
