@@ -93,7 +93,7 @@ void GameScene::Update()
 		const float fallAcc = -0.98f;
 		const float fallVYMin = -100.0f;
 		// 加速
-		fallV.m128_f32[1] = fallV.m128_f32[1] + fallAcc;
+		fallV.m128_f32[1] = max(fallV.m128_f32[1] + fallAcc, fallVYMin);
 		// 移動
 		XMFLOAT3 position = fbxObject3d->GetPosition();
 		position.x += fallV.m128_f32[0];
@@ -106,6 +106,17 @@ void GameScene::Update()
 	{
 		onGround = false;
 	}
+
+	//リセット
+	if (input->TriggerKey(DIK_R))
+	{
+		fbxObject3d->SetPosition({ 0, 50, 0 });
+		fallV = {};
+		onGround = true;
+	}
+
+	DebugText::GetInstance()->Print("Down  : SPACE", 0.0f, 0.0f, 2.0f);
+	DebugText::GetInstance()->Print("Reset : R", 0.0f, 24.0f, 2.0f);
 
 	fbxObject3d->Update();
 	// 全ての衝突をチェック
