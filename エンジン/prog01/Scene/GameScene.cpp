@@ -11,6 +11,7 @@
 
 #include "SceneManager.h"
 #include "FbxFactory.h"
+#include "ObjFactory.h"
 
 #include "DirectXCommon.h"
 #include "DebugText.h"
@@ -62,13 +63,13 @@ void GameScene::Initialize()
 	// 3Dオブジェクト生成
 
 	// FBXオブジェクト生成
-	fbxObject3d = FbxObject3d::Create(FbxFactory::GetInstance()->GetModel("a"), L"NormalMapFBX");
+	object3d = Object3d::Create(ObjFactory::GetInstance()->GetModel("sphere"));
 	//アニメーション
 	//fbxObject3d->PlayAnimation();
 
 	// カメラ注視点をセット
 	camera->SetTarget({ 0, 0, 0 });
-	camera->SetEye({ 0,1,-500 });
+	camera->SetEye({ 0,1,-150 });
 }
 
 void GameScene::Finalize()
@@ -82,7 +83,33 @@ void GameScene::Update()
 	camera->Update();
 	particleMan->Update();
 
-	fbxObject3d->Update();
+	XMFLOAT3 position = object3d->GetPosition();
+
+	velY += gravity;    //スピードに重力が加算される
+
+	if (input->PushKey(DIK_D))
+	{
+		velX += 0.5f;//ボールにスピードを加算
+	}
+	else if (input->PushKey(DIK_A))
+	{
+		velX -= 0.5f;//ボールにスピードを減算
+	}
+	position.x += velX;
+	position.y += velY;
+
+	if (position.y > 0)
+	{
+		if (velX != 0.0f)
+		{
+			velX *= damp;    //velXを減衰
+		}
+		position.y = 0;    //ボールは画面の外に外れない
+	}
+	object3d->SetPosition(position);
+
+
+	object3d->Update();
 	// 全ての衝突をチェック
 	collisionManager->CheckAllCollisions();
 }
@@ -104,11 +131,11 @@ void GameScene::Draw()
 #pragma region 3Dオブジェクト描画
 	// 3Dオブクジェクトの描画
 	Object3d::PreDraw(cmdList);
-	
+	object3d->Draw();
 	Object3d::PostDraw();
 #pragma endregion 3Dオブジェクト描画
 #pragma region 3Dオブジェクト(FBX)描画
-	fbxObject3d->Draw(cmdList);
+	
 #pragma endregion 3Dオブジェクト(FBX)描画
 #pragma region パーティクル
 	// パーティクルの描画
