@@ -98,9 +98,13 @@ void GameScene::Update()
 	{
 		// 下向き加速度
 		const float fallAcc = -0.98f;
-		const float fallVYMin = -100.0f;
+		//空気抵抗の比例定数
+		const float fallVYMinX = 0.0f;
+		//空気抵抗の比例定数
+		const float fallVYMinY = -10.0f;
 		// 加速
-		fallV.m128_f32[1] = max(fallV.m128_f32[1] + fallAcc, fallVYMin);
+		fallV.m128_f32[0] = max(fallV.m128_f32[0] + fallAcc, fallVYMinX);
+		fallV.m128_f32[1] = max(fallV.m128_f32[1] + fallAcc, fallVYMinY);
 		// 移動
 		XMFLOAT3 position = object3d->GetPosition();
 		position.x += fallV.m128_f32[0];
@@ -112,8 +116,9 @@ void GameScene::Update()
 	else if (input->TriggerKey(DIK_SPACE))
 	{
 		onGround = false;
-		const float jumpVYFist = 10.0f; //ジャンプ時上向き初速
-		fallV = { jumpVYFist, jumpVYFist, 0, 0 };
+		const float jumpVYFistY = 10.0f; //上向き初速
+		const float jumpVYFistX = 30.0f; //右向き初速
+		fallV = { jumpVYFistX, jumpVYFistY, 0, 0 };
 	}
 
 	//リセット
