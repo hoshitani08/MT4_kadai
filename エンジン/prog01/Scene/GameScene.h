@@ -55,9 +55,9 @@ private: // メンバ変数
 	//パーティクル
 	std::unique_ptr<ParticleManager> particleMan;
 	//オブジェクト
-	std::unique_ptr<FbxObject3d> fbxObject3d;
-
 	std::unique_ptr<Object3d> object3d;
+
+	std::unique_ptr<Object3d> object3d2;
 
 	//ライト
 	std::unique_ptr<LightGroup> light;
@@ -75,4 +75,13 @@ private: // メンバ変数
 	bool onGround = true;
 	// 落下ベクトル
 	DirectX::XMVECTOR fallV;
+
+	//ボールのx軸の初速
+	float velX = 5.0;
+	//ボールのy軸の初速
+	float velY = 0.0;
+	//ボールにかかる重力
+	float gravity = 0.6;
+	//摩擦による減衰
+	float damp = 0.95;
 };

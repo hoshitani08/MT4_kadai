@@ -63,23 +63,15 @@ void GameScene::Initialize()
 	// 3Dオブジェクト生成
 
 	// FBXオブジェクト生成
-	fbxObject3d = FbxObject3d::Create(FbxFactory::GetInstance()->GetModel("a"), L"NormalMapFBX");
 	object3d = Object3d::Create(ObjFactory::GetInstance()->GetModel("sphere"));
+	object3d2 = Object3d::Create(ObjFactory::GetInstance()->GetModel("sphere"));
 
-	float scale = 0.1f;
-	fbxObject3d->SetScale({ scale, scale * 2, scale });
-	fbxObject3d->SetPosition({ -200, 50, 0 });
-	fbxObject3d->SetRotation({ 0, 0, -45 });
-
-	scale = 9.0f;
-	object3d->SetPosition(fbxObject3d->GetPosition());
-	object3d->SetScale({ scale, scale, scale });
-	//アニメーション
-	//fbxObject3d->PlayAnimation();
+	object3d->SetPosition({ 10,0,0 });
+	object3d2->SetPosition({ -10,0,0 });
 
 	// カメラ注視点をセット
 	camera->SetTarget({ 0, 0, 0 });
-	camera->SetEye({ 0,1,-500 });
+	camera->SetEye({ 0,1,-150 });
 }
 
 void GameScene::Finalize()
@@ -96,43 +88,44 @@ void GameScene::Update()
 	// 落下処理
 	if (!onGround)
 	{
-		// 下向き加速度
-		const float fallAcc = -0.98f;
 		//空気抵抗の比例定数
-		const float fallVYMinX = 0.0f;
-		//空気抵抗の比例定数
-		const float fallVYMinY = -10.0f;
-		// 加速
-		fallV.m128_f32[0] = max(fallV.m128_f32[0] + fallAcc, fallVYMinX);
-		fallV.m128_f32[1] = max(fallV.m128_f32[1] + fallAcc, fallVYMinY);
+		const float fallVYMinX = -5.0f;
 		// 移動
 		XMFLOAT3 position = object3d->GetPosition();
-		position.x += fallV.m128_f32[0];
-		position.y += fallV.m128_f32[1];
-		position.z += fallV.m128_f32[2];
+		position.x -= fallV.m128_f32[0];
+		position.y -= gravity;
+
+		// 移動2
+		XMFLOAT3 position2 = object3d2->GetPosition();
+		position2.x += fallV.m128_f32[0];
+		position2.y += gravity;
+
+		if (position.y > 0 || position2.y > 0)
+		{
+			if (velX != 0.0f)
+			{
+				fallV.m128_f32[0] = max(fallV.m128_f32[0] * damp, fallVYMinX);
+			}
+			position.y = 0;    //ボールは画面の外に外れない
+			position2.y = 0;    //ボールは画面の外に外れない
+		}
 
 		object3d->SetPosition(position);
+		object3d2->SetPosition(position2);
 	}
 	else if (input->TriggerKey(DIK_SPACE))
 	{
 		onGround = false;
-		const float jumpVYFistY = 10.0f; //上向き初速
-		const float jumpVYFistX = 30.0f; //右向き初速
-		fallV = { jumpVYFistX, jumpVYFistY, 0, 0 };
+		const float jumpVYFistX = 3.0f; //右向き初速
+		fallV = { jumpVYFistX, 0, 0, 0 };
 	}
-
-	//リセット
-	if (input->TriggerKey(DIK_R))
-	{
-		object3d->SetPosition(fbxObject3d->GetPosition());
-		onGround = true;
-	}
+	
 
 	DebugText::GetInstance()->Print("Shot  : SPACE", 0.0f, 0.0f, 2.0f);
 	DebugText::GetInstance()->Print("Reset : R", 0.0f, 24.0f, 2.0f);
 
 	object3d->Update();
-	fbxObject3d->Update();
+	object3d2->Update();
 	// 全ての衝突をチェック
 	collisionManager->CheckAllCollisions();
 }
@@ -155,10 +148,11 @@ void GameScene::Draw()
 	// 3Dオブクジェクトの描画
 	Object3d::PreDraw(cmdList);
 	object3d->Draw();
+	object3d2->Draw();
 	Object3d::PostDraw();
 #pragma endregion 3Dオブジェクト描画
 #pragma region 3Dオブジェクト(FBX)描画
-	fbxObject3d->Draw(cmdList);
+	
 #pragma endregion 3Dオブジェクト(FBX)描画
 #pragma region パーティクル
 	// パーティクルの描画
