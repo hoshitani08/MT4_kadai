@@ -92,19 +92,20 @@ void GameScene::Update()
 		const float fallVYMinX = -5.0f;
 		// 移動
 		XMFLOAT3 position = object3d->GetPosition();
-		position.x -= fallV.m128_f32[0];
-		position.y -= gravity;
+		position.x += fallV.m128_f32[0];
+		position.y += gravity;
 
 		// 移動2
 		XMFLOAT3 position2 = object3d2->GetPosition();
-		position2.x += fallV.m128_f32[0];
+		position2.x += fallV2.m128_f32[0];
 		position2.y += gravity;
 
 		if (position.y > 0 || position2.y > 0)
 		{
-			if (velX != 0.0f)
+			if (fallV.m128_f32[0] != 0.0f || fallV2.m128_f32[0] != 0.0f)
 			{
 				fallV.m128_f32[0] = max(fallV.m128_f32[0] * damp, fallVYMinX);
+				fallV2.m128_f32[0] = max(fallV2.m128_f32[0] * damp, fallVYMinX);
 			}
 			position.y = 0;    //ボールは画面の外に外れない
 			position2.y = 0;    //ボールは画面の外に外れない
@@ -112,17 +113,25 @@ void GameScene::Update()
 
 		object3d->SetPosition(position);
 		object3d2->SetPosition(position2);
+
+		Sphere p1 = { position.x, position.y, position.z, 1 };
+		p1.radius = 1.15f;
+		Sphere p2 = { position2.x, position2.y, position2.z, 1 };
+		p2.radius = 1.15f;
+
+		if (Collision::CheckSphere2Sphere(p1, p2))
+		{
+			fallV.m128_f32[0] = fallV.m128_f32[0] * 2.0f;
+			fallV2.m128_f32[0] = fallV2.m128_f32[0] * 2.0f;
+		}
 	}
 	else if (input->TriggerKey(DIK_SPACE))
 	{
 		onGround = false;
 		const float jumpVYFistX = 3.0f; //右向き初速
-		fallV = { jumpVYFistX, 0, 0, 0 };
+		fallV = { -jumpVYFistX, 0, 0, 0 };
+		fallV2 = { jumpVYFistX, 0, 0, 0 };
 	}
-	
-
-	DebugText::GetInstance()->Print("Shot  : SPACE", 0.0f, 0.0f, 2.0f);
-	DebugText::GetInstance()->Print("Reset : R", 0.0f, 24.0f, 2.0f);
 
 	object3d->Update();
 	object3d2->Update();
