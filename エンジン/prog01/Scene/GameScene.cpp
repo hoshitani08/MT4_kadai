@@ -69,6 +69,10 @@ void GameScene::Initialize()
 	object3d->SetPosition({ 10,0,0 });
 	object3d2->SetPosition({ -10,0,0 });
 
+	float s = 1.2f;
+	object3d->SetScale({ s,s,s });
+	object3d2->SetScale({ s,s,s });
+
 	// カメラ注視点をセット
 	camera->SetTarget({ 0, 0, 0 });
 	camera->SetEye({ 0,1,-150 });
@@ -85,9 +89,47 @@ void GameScene::Update()
 	camera->Update();
 	particleMan->Update();
 
+	if (input->TriggerKey(DIK_RETURN))
+	{
+		if (!flag)
+		{
+			flag = true;
+		}
+		else if (flag)
+		{
+			flag = false;
+		}
+	}
+
+	if (!flag)
+	{
+		if (input->PushKey(DIK_W) && e <= 3.0f)
+		{
+			e += 0.1f;
+		}
+		else if (input->PushKey(DIK_S) && e >= 0.0f)
+		{
+			e -= 0.1f;
+		}
+
+		if (e > 3.0f)
+		{
+			e = 3.0f;
+		}
+		else if (e < 0.0f)
+		{
+			e = 0.0f;
+		}
+	}
+
 	// 落下処理
 	if (!onGround)
 	{
+		if (flag)
+		{
+			aV = fallV;
+		}
+		
 		//空気抵抗の比例定数
 		const float fallVYMinX = -5.0f;
 		// 移動
@@ -121,8 +163,14 @@ void GameScene::Update()
 
 		if (Collision::CheckSphere2Sphere(p1, p2))
 		{
-			fallV.m128_f32[0] = fallV.m128_f32[0] * 2.0f;
-			fallV2.m128_f32[0] = fallV2.m128_f32[0] * 2.0f;
+			if (flag)
+			{
+				bV = fallV;
+				e = bV.m128_f32[0] / aV.m128_f32[0];
+			}
+			
+			fallV.m128_f32[0] *= e;   //eは反発係数
+			fallV2.m128_f32[0] *= e; //eは反発係数
 		}
 	}
 	else if (input->TriggerKey(DIK_SPACE))
@@ -131,6 +179,30 @@ void GameScene::Update()
 		const float jumpVYFistX = 3.0f; //右向き初速
 		fallV = { -jumpVYFistX, 0, 0, 0 };
 		fallV2 = { jumpVYFistX, 0, 0, 0 };
+	}
+
+	if (input->PushKey(DIK_R))
+	{
+		flag = false;
+		onGround = true;
+		aV = {};
+		e = 1.0f;
+		bV = {};
+		object3d->SetPosition({ 10,0,0 });
+		object3d2->SetPosition({ -10,0,0 });
+	}
+
+	DebugText::GetInstance()->VariablePrint(0, 0, "ReboundCoefficient", e, 1.0f);
+	DebugText::GetInstance()->Print("W : UP", 0, 16, 1.0f);
+	DebugText::GetInstance()->Print("S : DOWN", 0, 32, 1.0f);
+
+	if (!flag)
+	{
+		DebugText::GetInstance()->Print("change : false", 0, 48, 1.0f);
+	}
+	else if (flag)
+	{
+		DebugText::GetInstance()->Print("change : true", 0, 64, 1.0f);
 	}
 
 	object3d->Update();

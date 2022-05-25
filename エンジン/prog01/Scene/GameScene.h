@@ -80,4 +80,10 @@ private: // ƒƒ“ƒo•Ï”
 	float gravity = 0.6;
 	//–€C‚É‚æ‚éŒ¸Š
 	float damp = 0.95;
+
+	float e = 1.0f;
+
+	bool flag = true;
+	DirectX::XMVECTOR aV = {}; //‚Ô‚Â‚©‚é‘O
+	DirectX::XMVECTOR bV = {}; //‚Ô‚Â‚©‚éŒã
 };
