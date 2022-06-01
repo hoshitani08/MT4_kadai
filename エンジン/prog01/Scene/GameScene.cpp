@@ -11,6 +11,7 @@
 
 #include "SceneManager.h"
 #include "FbxFactory.h"
+#include "ObjFactory.h"
 
 #include "DirectXCommon.h"
 #include "DebugText.h"
@@ -62,13 +63,14 @@ void GameScene::Initialize()
 	// 3Dオブジェクト生成
 
 	// FBXオブジェクト生成
-	fbxObject3d = FbxObject3d::Create(FbxFactory::GetInstance()->GetModel("a"), L"NormalMapFBX");
+	object3d = Object3d::Create(ObjFactory::GetInstance()->GetModel("sphere"));
+	object3d2 = Object3d::Create(ObjFactory::GetInstance()->GetModel("sphere"));
 	//アニメーション
 	//fbxObject3d->PlayAnimation();
 
 	// カメラ注視点をセット
 	camera->SetTarget({ 0, 0, 0 });
-	camera->SetEye({ 0,1,-500 });
+	camera->SetEye({ 0,1,-60 });
 }
 
 void GameScene::Finalize()
@@ -82,7 +84,64 @@ void GameScene::Update()
 	camera->Update();
 	particleMan->Update();
 
-	fbxObject3d->Update();
+	if (isFlag)
+	{
+		Length += 0.5f;
+		if (Length >= 30)
+		{
+			Length = 30;
+		}
+		float radius = angle * 3.14f / 180.0f;
+
+		XMFLOAT3 pos = object3d2->GetPosition();
+		XMFLOAT3 center = object3d->GetPosition();
+
+		pos.x = cos(radius) * Length;
+		pos.y = sin(radius) * Length;
+
+		pos.x += center.x;
+		pos.y += center.y;
+
+		object3d2->SetPosition(pos);
+
+		angle += 2.5f;
+	}
+
+	if (input->TriggerKey(DIK_SPACE) && !isFlag)
+	{
+		if (input->PushKey(DIK_A))
+		{
+			angle += 180;
+			isFlag = true;
+		}
+		else if (input->PushKey(DIK_D))
+		{
+			angle += 360;
+			isFlag = true;
+		}
+
+		if (input->PushKey(DIK_W))
+		{
+			angle += 90;
+			isFlag = true;
+		}
+		else if (input->PushKey(DIK_S))
+		{
+			angle += 270;
+			isFlag = true;
+		}
+	}
+
+	if (input->TriggerKey(DIK_R))
+	{
+		angle = 0.0f;
+		Length = 0.0f;
+		isFlag = false;
+		object3d2->SetPosition({0,0,0});
+	}
+
+	object3d->Update();
+	object3d2->Update();
 	// 全ての衝突をチェック
 	collisionManager->CheckAllCollisions();
 }
@@ -104,11 +163,12 @@ void GameScene::Draw()
 #pragma region 3Dオブジェクト描画
 	// 3Dオブクジェクトの描画
 	Object3d::PreDraw(cmdList);
-	
+	object3d->Draw();
+	object3d2->Draw();
 	Object3d::PostDraw();
 #pragma endregion 3Dオブジェクト描画
 #pragma region 3Dオブジェクト(FBX)描画
-	fbxObject3d->Draw(cmdList);
+	
 #pragma endregion 3Dオブジェクト(FBX)描画
 #pragma region パーティクル
 	// パーティクルの描画

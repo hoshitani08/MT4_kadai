@@ -5,6 +5,7 @@ const std::string ObjFactory::baseDirectory = "Resources/";
 
 void ObjFactory::Initialize()
 {
+	LoadModel("sphere");
 }
 
 void ObjFactory::Finalize()

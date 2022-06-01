@@ -55,7 +55,8 @@ private: // メンバ変数
 	//パーティクル
 	std::unique_ptr<ParticleManager> particleMan;
 	//オブジェクト
-	std::unique_ptr<FbxObject3d> fbxObject3d;
+	std::unique_ptr<Object3d> object3d;
+	std::unique_ptr<Object3d> object3d2;
 
 	//ライト
 	std::unique_ptr<LightGroup> light;
@@ -68,4 +69,13 @@ private: // メンバ変数
 	float fighterPos[3] = { 1, 0.0f, 0 };
 	//当たり判定
 	CollisionManager* collisionManager = nullptr;
+
+	//重力加速度
+	float m = 9.8f;
+	// 角度
+	float angle = 0.0f;
+	// 半径の長さ
+	float Length = 0.0f;
+
+	bool isFlag = false;
 };
