@@ -51,11 +51,11 @@ private: // メンバ変数
 	//カメラ
 	std::unique_ptr<Camera> camera;
 	//スプライト
-	std::unique_ptr<Sprite> sprite;
+	std::unique_ptr<Sprite> sprite1;
+	std::unique_ptr<Sprite> sprite2;
 	//パーティクル
 	std::unique_ptr<ParticleManager> particleMan;
 	//オブジェクト
-	std::unique_ptr<FbxObject3d> fbxObject3d;
 
 	//ライト
 	std::unique_ptr<LightGroup> light;

@@ -78,6 +78,8 @@ public: // メンバ関数
 	void SetRotation(float rotation);
 	// 座標の設定
 	void SetPosition(XMFLOAT2 position);
+	// 座標の取得
+	const XMFLOAT2& GetPosition() { return position; }
 	// サイズの設定
 	void SetSize(XMFLOAT2 size);
 	// アンカーポイントの設定
@@ -88,6 +90,10 @@ public: // メンバ関数
 	void SetIsFlipY(bool isFlipY);
 	// テクスチャ範囲設定
 	void SetTextureRect(XMFLOAT2 texBase, XMFLOAT2 texSize);
+	// ワールド行列の取得
+	const XMMATRIX& GetMatWorld() { return matWorld; }
+	// 色の設定
+	void SetColor(XMFLOAT4 _color);
 	// 描画
 	void Draw();
 

@@ -15,6 +15,15 @@ void SpriteFactory::Initialize()
 	{
 		assert(0);
 	}
+
+	if (!Sprite::LoadTexture(2, L"Resources/enn.png"))
+	{
+		assert(0);
+	}
+	if (!Sprite::LoadTexture(3, L"Resources/bou.png"))
+	{
+		assert(0);
+	}
 }
 
 SpriteFactory* SpriteFactory::GetInstance()

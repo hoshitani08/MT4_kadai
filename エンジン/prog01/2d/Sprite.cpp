@@ -496,6 +496,13 @@ void Sprite::SetTextureRect(XMFLOAT2 texBase, XMFLOAT2 texSize)
 	TransferVertices();
 }
 
+void Sprite::SetColor(XMFLOAT4 _color)
+{
+	color = _color;
+	// 頂点バッファへのデータ転送
+	TransferVertices();
+}
+
 void Sprite::Draw()
 {
 	// ワールド行列の更新

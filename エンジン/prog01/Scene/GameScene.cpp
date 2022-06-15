@@ -37,9 +37,13 @@ void GameScene::Initialize()
 	FbxObject3d::SetCamera(camera.get());
 
 	// 背景スプライト生成
-	sprite = Sprite::Create(1, { 0.0f,0.0f });
-	sprite->SetSize({ 100.0f,100.0f });
-	sprite->SetPosition({ 100.0f,100.0f });
+	sprite1 = Sprite::Create(2, { 0.0f,0.0f });
+	sprite1->SetSize({ 100.0f,100.0f });
+	sprite1->SetPosition({ 1280.0f / 2 - 60, 720.0f / 2 - 60 });
+
+	sprite2 = Sprite::Create(3, { 0.0f,0.0f });
+	sprite2->SetSize({ 1.0f,200.0f });
+	sprite2->SetPosition({ 450.0f,250.0f });
 
 	// パーティクルマネージャ生成
 	particleMan = ParticleManager::Create(DirectXCommon::GetInstance()->GetDevice(), camera.get());
@@ -62,9 +66,8 @@ void GameScene::Initialize()
 	// 3Dオブジェクト生成
 
 	// FBXオブジェクト生成
-	fbxObject3d = FbxObject3d::Create(FbxFactory::GetInstance()->GetModel("a"), L"NormalMapFBX");
+
 	//アニメーション
-	//fbxObject3d->PlayAnimation();
 
 	// カメラ注視点をセット
 	camera->SetTarget({ 0, 0, 0 });
@@ -82,7 +85,55 @@ void GameScene::Update()
 	camera->Update();
 	particleMan->Update();
 
-	fbxObject3d->Update();
+	if (input->PushKey(DIK_W) || input->PushKey(DIK_S) || input->PushKey(DIK_A) | input->PushKey(DIK_D))
+	{
+		XMFLOAT2 pos = sprite2->GetPosition();
+
+		if (input->PushKey(DIK_W))
+		{
+			pos.y -= 2.0f;
+		}
+		else if (input->PushKey(DIK_S))
+		{
+			pos.y += 2.0f;
+		}
+
+		if (input->PushKey(DIK_A))
+		{
+			pos.x -= 2.0f;
+		}
+		else if (input->PushKey(DIK_D))
+		{
+			pos.x += 2.0f;
+		}
+		sprite2->SetPosition(pos);
+	}
+
+	XMFLOAT2 spos = sprite1->GetPosition();
+	XMFLOAT2 bpos = sprite2->GetPosition();
+
+	/*float d = ((bpos.x + 0.5f) - (bpos.x + 0.5f)) * (spos.y - bpos.y);
+	float e = ((bpos.y + 200) - bpos.y) * (spos.x - (bpos.x + 0.5f));
+
+	float a = -(d - e);*/
+
+	Sphere a;
+	a.center = { spos.x + 50, spos.y + 50, 0 };
+	a.radius = 50;
+	
+	Box b;
+	b.center = { bpos.x + 0.5f, bpos.y + 100, 0 };
+	b.scale = { 1,150,1 };
+
+	if (Collision::CheckSphere2Box(a,b))
+	{
+		sprite1->SetColor({1,0,0,1});
+	}
+	else
+	{
+		sprite1->SetColor({ 1,1,1,1 });
+	}
+
 	// 全ての衝突をチェック
 	collisionManager->CheckAllCollisions();
 }
@@ -95,7 +146,8 @@ void GameScene::Draw()
 	// 背景スプライト描画前処理
 	Sprite::PreDraw(cmdList);
 	// 背景スプライト描画
-	
+	sprite2->Draw();
+	sprite1->Draw();
 	// スプライト描画後処理
 	Sprite::PostDraw();
 	// 深度バッファクリア
@@ -108,7 +160,7 @@ void GameScene::Draw()
 	Object3d::PostDraw();
 #pragma endregion 3Dオブジェクト描画
 #pragma region 3Dオブジェクト(FBX)描画
-	fbxObject3d->Draw(cmdList);
+
 #pragma endregion 3Dオブジェクト(FBX)描画
 #pragma region パーティクル
 	// パーティクルの描画
