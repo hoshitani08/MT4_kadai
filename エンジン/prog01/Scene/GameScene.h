@@ -15,6 +15,7 @@
 #include <DirectXMath.h>
 #include <vector>
 #include <memory>
+#include <array>
 
 class CollisionManager;
 class Player;
@@ -55,7 +56,17 @@ private: // メンバ変数
 	//パーティクル
 	std::unique_ptr<ParticleManager> particleMan;
 	//オブジェクト
-	std::unique_ptr<FbxObject3d> fbxObject3d;
+	std::unique_ptr<Object3d> object3d1;
+	std::unique_ptr<Object3d> object3d2;
+	std::unique_ptr<Object3d> object3d3;
+
+	std::array<std::unique_ptr<Object3d>, 9> sab1;
+	std::array<std::unique_ptr<Object3d>, 9> sab2;
+	std::array<std::unique_ptr<Object3d>, 9> sab3;
+
+	float timer = 0.0f;
+	int count = 1;
+	bool easeFlag = false;
 
 	//ライト
 	std::unique_ptr<LightGroup> light;

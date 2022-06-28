@@ -11,11 +11,13 @@
 
 #include "SceneManager.h"
 #include "FbxFactory.h"
+#include "ObjFactory.h"
 
 #include "DirectXCommon.h"
 #include "DebugText.h"
 #include "Audio.h"
 #include "Input.h"
+#include "Ease.h"
 
 using namespace DirectX;
 
@@ -60,15 +62,30 @@ void GameScene::Initialize()
 	light->SetDirLightDir(0, { 0,0,1,0 });
 
 	// 3Dオブジェクト生成
+	object3d1 = Object3d::Create(ObjFactory::GetInstance()->GetModel("sphere"));
+	object3d2 = Object3d::Create(ObjFactory::GetInstance()->GetModel("sphere"));
+	object3d3 = Object3d::Create(ObjFactory::GetInstance()->GetModel("sphere"));
+
+	object3d1->SetPosition({ -45, 10, 0 });
+	object3d2->SetPosition({ -45, 0, 0 });
+	object3d3->SetPosition({ -45, -10, 0 });
+
+	for (int i = 0; i < sab1.size(); i++)
+	{
+		sab1[i] = Object3d::Create(ObjFactory::GetInstance()->GetModel("sphere"));
+		sab2[i] = Object3d::Create(ObjFactory::GetInstance()->GetModel("sphere"));
+		sab3[i] = Object3d::Create(ObjFactory::GetInstance()->GetModel("sphere"));
+
+		sab1[i]->SetPosition({ 0, 100, 0 });
+		sab2[i]->SetPosition({ 0, 100, 0 });
+		sab3[i]->SetPosition({ 0, 100, 0 });
+	}
 
 	// FBXオブジェクト生成
-	fbxObject3d = FbxObject3d::Create(FbxFactory::GetInstance()->GetModel("a"), L"NormalMapFBX");
-	//アニメーション
-	//fbxObject3d->PlayAnimation();
 
 	// カメラ注視点をセット
 	camera->SetTarget({ 0, 0, 0 });
-	camera->SetEye({ 0,1,-500 });
+	camera->SetEye({ 0,1,-50 });
 }
 
 void GameScene::Finalize()
@@ -82,7 +99,46 @@ void GameScene::Update()
 	camera->Update();
 	particleMan->Update();
 
-	fbxObject3d->Update();
+	if (input->TriggerKey(DIK_SPACE) && !easeFlag)
+	{
+		easeFlag = true;
+	}
+
+	if (easeFlag)
+	{
+		float timeRate = 0.0f;
+		int countNum = 60;
+		timeRate = timer / countNum;
+		timer++;
+
+		object3d1->SetPosition(Ease::easeIn({ -45, 10, 0 }, { 45, 10, 0 }, timeRate));
+		object3d2->SetPosition(Ease::easeOut({ -45, 0, 0 }, { 45, 0, 0 }, timeRate));
+		object3d3->SetPosition(Ease::easeInOut({ -45, -10, 0 }, { 45, -10, 0 }, timeRate));
+
+		if (timer >= 6 * count && count < 10)
+		{
+			sab1[count - 1]->SetPosition(object3d1->GetPosition());
+			sab2[count - 1]->SetPosition(object3d2->GetPosition());
+			sab3[count - 1]->SetPosition(object3d3->GetPosition());
+			count++;
+		}
+
+		if (timer > countNum)
+		{
+			timer = 0;
+			easeFlag = false;
+		}
+	}
+
+	for (int i = 0; i < sab1.size(); i++)
+	{
+		sab1[i]->Update();
+		sab2[i]->Update();
+		sab3[i]->Update();
+	}
+	object3d1->Update();
+	object3d2->Update();
+	object3d3->Update();
 	// 全ての衝突をチェック
 	collisionManager->CheckAllCollisions();
 }
@@ -104,11 +160,19 @@ void GameScene::Draw()
 #pragma region 3Dオブジェクト描画
 	// 3Dオブクジェクトの描画
 	Object3d::PreDraw(cmdList);
-	
+	for (int i = 0; i < sab1.size(); i++)
+	{
+		sab1[i]->Draw();
+		sab2[i]->Draw();
+		sab3[i]->Draw();
+	}
+	object3d1->Draw();
+	object3d2->Draw();
+	object3d3->Draw();
 	Object3d::PostDraw();
 #pragma endregion 3Dオブジェクト描画
 #pragma region 3Dオブジェクト(FBX)描画
-	fbxObject3d->Draw(cmdList);
+
 #pragma endregion 3Dオブジェクト(FBX)描画
 #pragma region パーティクル
 	// パーティクルの描画
