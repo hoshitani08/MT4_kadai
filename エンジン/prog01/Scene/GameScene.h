@@ -55,7 +55,8 @@ private: // メンバ変数
 	//パーティクル
 	std::unique_ptr<ParticleManager> particleMan;
 	//オブジェクト
-	std::unique_ptr<FbxObject3d> fbxObject3d;
+	std::unique_ptr<Object3d> fbxObject3d;
+	std::unique_ptr<Object3d> fbxObject3d2;
 
 	//ライト
 	std::unique_ptr<LightGroup> light;
@@ -68,4 +69,15 @@ private: // メンバ変数
 	float fighterPos[3] = { 1, 0.0f, 0 };
 	//当たり判定
 	CollisionManager* collisionManager = nullptr;
+
+	bool flag = false;
+
+	float y;             //オブジェクトのy座標
+	float mass = 10.1;   //オブジェクトの質量
+	float k = 0.3;       //ばねの強さ（ばね定数）
+	float damp = 0.97;   //摩擦による減衰率
+	float velY = 0.0;    //y方向のスピード
+	float accel = 0;     //加速度
+	float force = 0;     //ばねの反発力 
+	float originY = 20;       //基準点
 };

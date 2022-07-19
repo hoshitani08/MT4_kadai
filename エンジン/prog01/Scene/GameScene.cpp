@@ -11,6 +11,7 @@
 
 #include "SceneManager.h"
 #include "FbxFactory.h"
+#include "ObjFactory.h"
 
 #include "DirectXCommon.h"
 #include "DebugText.h"
@@ -62,13 +63,18 @@ void GameScene::Initialize()
 	// 3Dオブジェクト生成
 
 	// FBXオブジェクト生成
-	fbxObject3d = FbxObject3d::Create(FbxFactory::GetInstance()->GetModel("a"), L"NormalMapFBX");
+	fbxObject3d = Object3d::Create(ObjFactory::GetInstance()->GetModel("sphere"));
+	fbxObject3d->SetPosition({ 0,0,0 });
+
+	fbxObject3d2 = Object3d::Create(ObjFactory::GetInstance()->GetModel("cube"));
+	fbxObject3d2->SetScale({0.3f,80,0.3f });
+	fbxObject3d2->SetPosition({ 0,40,0 });
 	//アニメーション
 	//fbxObject3d->PlayAnimation();
 
 	// カメラ注視点をセット
 	camera->SetTarget({ 0, 0, 0 });
-	camera->SetEye({ 0,1,-500 });
+	camera->SetEye({ 0,1,-90 });
 }
 
 void GameScene::Finalize()
@@ -82,7 +88,35 @@ void GameScene::Update()
 	camera->Update();
 	particleMan->Update();
 
+	XMFLOAT3 pos = fbxObject3d->GetPosition();
+	XMFLOAT3 pos2 = fbxObject3d2->GetPosition();
+
+	if (input->TriggerKey(DIK_SPACE) && !flag)
+	{
+		flag = true;
+	}
+
+	if (flag)
+	{
+		float distY = originY - pos.y;  //基準点からの距離
+		force = k * distY;    //ばねの力を計算（F = kx）
+		accel = force / mass;            //重さによる加速度を計算
+		velY = damp * (velY + accel);      //摩擦による減衰を計算
+		pos.y += velY;                       //オブジェクトを移動
+
+		pos2.y = (pos.y + 50) / 2;
+
+		float a = (pos.y - 50);
+
+		fbxObject3d2->SetScale({ 0.3f,a,0.3f });
+
+
+		fbxObject3d->SetPosition(pos);
+		fbxObject3d2->SetPosition(pos2);
+	}
+
 	fbxObject3d->Update();
+	fbxObject3d2->Update();
 	// 全ての衝突をチェック
 	collisionManager->CheckAllCollisions();
 }
@@ -104,11 +138,12 @@ void GameScene::Draw()
 #pragma region 3Dオブジェクト描画
 	// 3Dオブクジェクトの描画
 	Object3d::PreDraw(cmdList);
-	
+	fbxObject3d->Draw();
+	fbxObject3d2->Draw();
 	Object3d::PostDraw();
 #pragma endregion 3Dオブジェクト描画
 #pragma region 3Dオブジェクト(FBX)描画
-	fbxObject3d->Draw(cmdList);
+	
 #pragma endregion 3Dオブジェクト(FBX)描画
 #pragma region パーティクル
 	// パーティクルの描画
